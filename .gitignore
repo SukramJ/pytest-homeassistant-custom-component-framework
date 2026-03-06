@@ -130,3 +130,5 @@ dmypy.json
 
 # this packages temporary folder
 tmp_dir/
+
+/.idea

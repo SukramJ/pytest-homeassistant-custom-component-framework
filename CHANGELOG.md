@@ -3,6 +3,12 @@ This changelog only includes changes directly related to the structure of this p
 
 Changes to minor version indicate a change structurally in this pacakge.  Changes in patch indicate changes solely from homeassistant/core. The latter does not imply no breaking changes are introduced.
 
+## 0.14.0
+* Fork as `pytest-homeassistant-custom-component-framework`
+* Bump minimum Python version to Python 3.14
+* Migrate GitHub Actions from deprecated `set-output` to `$GITHUB_OUTPUT`
+* Unify PyPI publishing to use `pypa/gh-action-pypi-publish` across all workflows
+
 ## 0.13.0
 * bump minimum Python version to Python 3.10
 

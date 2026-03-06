@@ -17,11 +17,11 @@ jobs:
         uses: actions/checkout@v5
       - name: store current ha version
         id: current-ha-version
-        run: echo "::set-output name=current-ha-version::$(cat ha_version)"
+        run: echo "current-ha-version=$(cat ha_version)" >> $GITHUB_OUTPUT
       - name: setup python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.14'
       - name: install dependencies
         run: pip install -r requirements_generate.txt
       - name: Install phacc for current versions
@@ -32,14 +32,14 @@ jobs:
           python generate_phacc/generate_phacc.py
       - name: store new ha version
         id: new-ha-version
-        run: echo "::set-output name=new-ha-version::$(cat ha_version)"
+        run: echo "new-ha-version=$(cat ha_version)" >> $GITHUB_OUTPUT
       - name: check need to release
         id: need-to-release
         run: |
           if [[ "${{ steps.current-ha-version.outputs.current-ha-version}}" == "${{ steps.new-ha-version.outputs.new-ha-version }}" ]]; then
-            echo "::set-output name=need-to-release::false"
+            echo "need-to-release=false" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=need-to-release::true"
+            echo "need-to-release=true" >> $GITHUB_OUTPUT
           fi
       - name: list files
         run: ls -a
@@ -59,7 +59,7 @@ jobs:
     if: needs.generate_package.outputs.need_to_release == 'true'
     strategy:
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.14']
     steps:
       - name: checkout repo content
         uses: actions/checkout@v5
@@ -100,12 +100,12 @@ jobs:
       - run: echo "${{ steps.next_version.outputs.version }}"
       - id: git_commit
         run: |
-          git config user.name 'Matthew Flamm'
-          git config user.email 'MatthewFlamm@users.noreply.github.com'
+          git config user.name 'SukramJ'
+          git config user.email 'SukramJ@users.noreply.github.com'
           git add .
           git commit -m "Bump version"
           git push
-          echo "::set-output name=sha::$(git rev-parse HEAD)"
+          echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
       - uses: zwaldowski/semver-release-action@v4
         with:
           github_token: ${{ secrets.REPO_SCOPED_TOKEN }}
@@ -126,7 +126,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.14'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip

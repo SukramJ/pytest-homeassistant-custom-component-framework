@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v5
       - name: store current ha version
         id: current-ha-version
-        run: echo "::set-output name=current-ha-version::$(cat ha_version)"
+        run: echo "current-ha-version=$(cat ha_version)" >> $GITHUB_OUTPUT
       - id: next_version
         uses: zwaldowski/semver-release-action@v4
         with:
@@ -25,12 +25,12 @@ jobs:
       - run: echo "${{ steps.next_version.outputs.version }}"
       - id: git_commit
         run: |
-          git config user.name 'Matthew Flamm'
-          git config user.email 'MatthewFlamm@users.noreply.github.com'
+          git config user.name 'SukramJ'
+          git config user.email 'SukramJ@users.noreply.github.com'
           git add .
           git commit -m "Bump version"
           git push
-          echo "::set-output name=sha::$(git rev-parse HEAD)"
+          echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
       - uses: zwaldowski/semver-release-action@v4
         with:
           github_token: ${{ secrets.REPO_SCOPED_TOKEN }}
@@ -51,15 +51,15 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.14'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install setuptools wheel twine
-      - name: Build and publish
-        env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      - name: Build
         run: |
           python setup.py sdist bdist_wheel
-          twine upload dist/*
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_TOKEN }}
