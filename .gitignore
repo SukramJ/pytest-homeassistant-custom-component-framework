@@ -132,3 +132,4 @@ dmypy.json
 tmp_dir/
 
 /.idea
+.claude/settings.local.json
