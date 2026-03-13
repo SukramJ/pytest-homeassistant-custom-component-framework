@@ -44,6 +44,7 @@ def cli(regen):
         os.makedirs(os.path.join(PACKAGE_DIR, "components", "recorder"))
         os.makedirs(os.path.join(PACKAGE_DIR, "components", "diagnostics"))
         os.makedirs(os.path.join(PACKAGE_DIR, "testing_config", "custom_components", "test_constant_deprecation"))
+        os.makedirs(os.path.join(PACKAGE_DIR, "fixtures"))
         shutil.copy2(os.path.join(TMP_DIR, REQUIREMENTS_FILE), REQUIREMENTS_FILE)
         shutil.copy2(
             os.path.join(TMP_DIR, "homeassistant", CONST_FILE),
@@ -89,6 +90,12 @@ def cli(regen):
             os.path.join(TMP_DIR, LICENSE_FILE_HA),
             LICENSE_FILE_NEW,
         )
+
+        # Create test fixture files
+        with open(os.path.join(PACKAGE_DIR, "fixtures", "test_data.json"), "w") as f:
+            f.write('{\n    "test_key": "test_value"\n}\n')
+        with open(os.path.join(PACKAGE_DIR, "fixtures", "test_array.json"), "w") as f:
+            f.write('[\n    {"test_key1": "test_value1"},\n    {"test_key2": "test_value2"}\n]')
 
         for f in files:
             shutil.copy2(os.path.join(TMP_DIR, "tests", f), os.path.join(PACKAGE_DIR, f))
