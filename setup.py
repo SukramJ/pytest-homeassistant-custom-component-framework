@@ -19,6 +19,7 @@ setup(
     version=__version__,
     packages=find_packages(where="src"),
     package_dir={"": "src"},
+    package_data={"pytest_homeassistant_custom_component": ["fixtures/*.json"]},
     python_requires=">=3.14",
     install_requires=requirements,
     license="MIT license",
