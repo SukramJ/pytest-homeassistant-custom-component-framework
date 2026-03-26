@@ -196,6 +196,7 @@ def cli(regen):
         add_dependency("sqlalchemy", data, new_data)
         add_dependency("paho-mqtt", data, new_data)
         add_dependency("numpy", data, new_data)
+        add_dependency("aiohasupervisor", data, new_data)
 
         removed_data.insert(0, added_text)
 

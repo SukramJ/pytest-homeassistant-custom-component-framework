@@ -39,3 +39,5 @@ paho-mqtt==2.1.0
 
 numpy==2.3.2
 
+aiohasupervisor==0.3.3
+
