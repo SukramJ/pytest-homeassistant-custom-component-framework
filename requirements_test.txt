@@ -36,7 +36,7 @@ respx==0.23.1
 syrupy==5.3.2
 tqdm==4.67.1
 unidiff==0.7.5
-homeassistant==2026.7.0b3
+homeassistant==2026.7.0
 SQLAlchemy==2.0.51
 
 paho-mqtt==2.1.0
