@@ -11,16 +11,28 @@ jobs:
   make_release:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: store current ha version
         id: current-ha-version
         run: echo "current-ha-version=$(cat ha_version)" >> $GITHUB_OUTPUT
-      - id: next_version
-        uses: zwaldowski/semver-release-action@v4
-        with:
-          dry_run: true
-          bump: ${{ github.event.inputs.type }}
-          github_token: ${{ secrets.REPO_SCOPED_TOKEN }}
+      - name: Calculate next version
+        id: next_version
+        env:
+          GH_TOKEN: ${{ secrets.REPO_SCOPED_TOKEN }}
+          BUMP: ${{ github.event.inputs.type }}
+        run: |
+          latest=$(gh api "repos/${GITHUB_REPOSITORY}/tags" --paginate --jq '.[].name' \
+            | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1 || true)
+          latest=${latest:-0.0.0}
+          IFS=. read -r major minor patch <<< "$latest"
+          case "$BUMP" in
+            major) major=$((major + 1)); minor=0; patch=0 ;;
+            minor) minor=$((minor + 1)); patch=0 ;;
+            patch) patch=$((patch + 1)) ;;
+            *) echo "unknown bump type: $BUMP" >&2; exit 1 ;;
+          esac
+          echo "version=${major}.${minor}.${patch}" >> $GITHUB_OUTPUT
+          echo "latest tag: ${latest} -> next version: ${major}.${minor}.${patch}"
       - run: echo "${{ steps.next_version.outputs.version }}" > version
       - run: echo "${{ steps.next_version.outputs.version }}"
       - id: git_commit
@@ -31,34 +43,30 @@ jobs:
           git commit -m "Bump version"
           git push
           echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-      - uses: zwaldowski/semver-release-action@v4
-        with:
-          github_token: ${{ secrets.REPO_SCOPED_TOKEN }}
-          sha: ${{ steps.git_commit.outputs.sha }}
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.REPO_SCOPED_TOKEN }}
+        uses: softprops/action-gh-release@v3
         with:
+          token: ${{ secrets.REPO_SCOPED_TOKEN }}
           tag_name: ${{ steps.next_version.outputs.version }}
-          release_name: Release ${{ steps.next_version.outputs.version }}
+          target_commitish: ${{ steps.git_commit.outputs.sha }}
+          name: Release ${{ steps.next_version.outputs.version }}
           body: |
             Automatic release
             homeassistant version: ${{ steps.current-ha-version.outputs.current-ha-version }}
           draft: false
           prerelease: false
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.14'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools wheel twine
+          pip install build
       - name: Build
         run: |
-          python setup.py sdist bdist_wheel
+          python -m build
       - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
